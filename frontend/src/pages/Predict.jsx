@@ -21,6 +21,7 @@ export default function Predict() {
   const [brandSearch, setBrandSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const brandRef = useRef(null);
+  const [carModel, setCarModel] = useState('');
   const [bodyType, setBodyType] = useState('');
   const [segment, setSegment] = useState('Mid-Range');
   const [year, setYear] = useState(2020);
@@ -39,8 +40,9 @@ export default function Predict() {
   useEffect(() => {
     fetchOptions().then((o) => {
       setOptions(o);
-      setBrand(o.brands[0] || '');
-      setBrandSearch(o.brands[0] || '');
+      setBrand('');
+      setBrandSearch('');
+      setCarModel('');
       setBodyType(o.body_types[0] || '');
       setFetching(false);
     });
@@ -51,6 +53,7 @@ export default function Predict() {
     setResult(null);
     const res = await predictPrice({
       brand,
+      car_model: carModel,
       body_type: bodyType,
       year: parseInt(year),
       month: parseInt(month),
@@ -80,6 +83,9 @@ export default function Predict() {
     setBrand(b);
     setBrandSearch(b);
     setShowSuggestions(false);
+    if (options?.models_by_brand[b]) {
+        setCarModel(options.models_by_brand[b][0] || '');
+    }
   };
 
   useEffect(() => {
@@ -115,9 +121,13 @@ export default function Predict() {
                 <label className="form-label">Brand</label>
                 <div className="autocomplete-wrapper">
                   <input
-                    type="text" className="form-input" placeholder="Search brand..."
+                    type="text" className="form-input" placeholder="e.g. Maruti Suzuki..."
                     value={brandSearch}
-                    onChange={(e) => { setBrandSearch(e.target.value); setShowSuggestions(true); }}
+                    onChange={(e) => {
+                      setBrandSearch(e.target.value);
+                      setShowSuggestions(true);
+                      if (e.target.value !== brand) setBrand(''); // clear actual brand if typing
+                    }}
                     onFocus={() => setShowSuggestions(true)}
                   />
                   {showSuggestions && filteredBrands.length > 0 && (
@@ -128,6 +138,23 @@ export default function Predict() {
                     </ul>
                   )}
                 </div>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Model</label>
+                <select 
+                  className="form-select" 
+                  value={carModel} 
+                  onChange={(e) => setCarModel(e.target.value)}
+                  disabled={!brand}
+                >
+                  {!brand && <option value="">Select a brand first</option>}
+                  {brand && (options.models_by_brand[brand] || []).map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Body Type</label>
@@ -244,10 +271,14 @@ export default function Predict() {
               </div>
             </div>
 
-            <button className="predict-btn" onClick={handlePredict} disabled={loading}>
+            <button 
+              className="predict-btn" 
+              onClick={handlePredict} 
+              disabled={loading || !brand || !carModel}
+            >
               {loading ? (
                 <span className="predict-btn__loading"><div className="loader loader--small"></div> Analyzing...</span>
-              ) : 'Predict Price'}
+              ) : !brand ? 'Select Brand to Predict' : 'Predict Price'}
             </button>
           </div>
         </div>
@@ -266,6 +297,10 @@ export default function Predict() {
                 <div className="result-detail">
                   <span className="result-detail__label">Brand</span>
                   <span className="result-detail__value">{brand}</span>
+                </div>
+                <div className="result-detail">
+                  <span className="result-detail__label">Model</span>
+                  <span className="result-detail__value">{carModel}</span>
                 </div>
                 <div className="result-detail">
                   <span className="result-detail__label">Type</span>
@@ -298,13 +333,17 @@ export default function Predict() {
               </div>
 
               <p className="result-card__note">
-                CV Accuracy: {((result.cv_accuracy || 0) * 100).toFixed(1)}% · Gradient Boosting · Kaggle CarDekho
+                CV Accuracy: {((result.cv_accuracy || 0) * 100).toFixed(1)}% · Gradient Boosting · Kaggle Data
               </p>
               <div className="result-card__badge">Indian Market Value</div>
             </div>
           ) : (
-            <div className="result-placeholder">
-              <p>Describe a car using the form<br />and click <strong>"Predict Price"</strong></p>
+            <div className="predict-empty">
+              <div className="predict-empty__icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </div>
+              <h3>Select a vehicle to appraise</h3>
+              <p>Choose a brand, model, and specifications on the left to instantly calculate its current market value based on {options?.total_cars?.toLocaleString('en-IN') || 8128} real market transactions.</p>
             </div>
           )}
         </div>
