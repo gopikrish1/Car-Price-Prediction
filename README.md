@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Car-Price-Prediction
-=======
 # AutoValuate - Car Price Intelligence
 
 AutoValuate is a comprehensive, AI-powered car price prediction and analysis tool tailored for the Indian used car market. It features a modern React (Vite) frontend for an immersive user experience, and a robust FastAPI backend powered by an advanced Gradient Boosting ML model.
@@ -87,5 +84,4 @@ The frontend will be accessible at `http://localhost:5173`. Open this URL in you
 
 ## Authors
 
-- Gopikrishnan
->>>>>>> 71e7f6e (Initial commit of Indian Car Price Prediction application)
+- Gopi Krishnaa
