@@ -20,7 +20,8 @@ car_model = CarPriceModel()
 
 class PredictionRequest(BaseModel):
     brand: str
-    car_model: str
+    body_type: str
+    segment: str
     year: int
     month: int
     mileage_k: float
@@ -30,7 +31,6 @@ class PredictionRequest(BaseModel):
     condition: str
     owners: int
     reg_type: str
-    seller_type: str
     fuel_efficiency: float
     max_power: float
     seats: int
@@ -82,7 +82,8 @@ def get_scatter(feature: str):
 def predict(req: PredictionRequest):
     result = car_model.predict(
         brand=req.brand,
-        car_model=req.car_model,
+        body_type=req.body_type,
+        segment=req.segment,
         year=req.year,
         month=req.month,
         mileage_k=req.mileage_k,
@@ -92,7 +93,6 @@ def predict(req: PredictionRequest):
         condition=req.condition,
         owners=req.owners,
         reg_type=req.reg_type,
-        seller_type=req.seller_type,
         fuel_efficiency=req.fuel_efficiency,
         max_power=req.max_power,
         seats=req.seats,
@@ -100,8 +100,6 @@ def predict(req: PredictionRequest):
     return {
         "predicted_price": result['price'],
         "price_range": {"low": result['price_low'], "high": result['price_high']},
-        "body_type": result['body_type'],
-        "segment": result['segment'],
         "currency": "INR",
         "train_accuracy": car_model.train_score,
         "cv_accuracy": car_model.cv_score,

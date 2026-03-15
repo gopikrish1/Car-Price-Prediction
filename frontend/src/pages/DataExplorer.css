@@ -226,6 +226,7 @@
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .brand-cell {

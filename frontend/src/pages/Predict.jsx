@@ -5,14 +5,12 @@ import './Predict.css';
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const FUEL_META = {
-  'Petrol':   { color: '#ef4444', dot: '#fca5a5', border: '#dc2626', label: 'Petrol' },
-  'Diesel':   { color: '#64748b', dot: '#94a3b8', border: '#475569', label: 'Diesel' },
-  'CNG':      { color: '#22c55e', dot: '#86efac', border: '#16a34a', label: 'CNG' },
-  'P+CNG':    { color: '#10b981', dot: '#6ee7b7', border: '#059669', label: 'Petrol + CNG' },
-  'D+CNG':    { color: '#14b8a6', dot: '#5eead4', border: '#0d9488', label: 'Diesel + CNG' },
-  'EV':       { color: '#3b82f6', dot: '#93c5fd', border: '#2563eb', label: 'Electric (EV)' },
-  'Hybrid':   { color: '#8b5cf6', dot: '#c4b5fd', border: '#7c3aed', label: 'Hybrid' },
-  'P+Hybrid': { color: '#a855f7', dot: '#d8b4fe', border: '#9333ea', label: 'Petrol + Hybrid' },
+  'Petrol':          { color: '#ef4444', dot: '#fca5a5', border: '#dc2626', label: 'Petrol' },
+  'Diesel':          { color: '#64748b', dot: '#94a3b8', border: '#475569', label: 'Diesel' },
+  'Petrol + CNG':    { color: '#10b981', dot: '#6ee7b7', border: '#059669', label: 'Petrol + CNG' },
+  'Diesel + CNG':    { color: '#14b8a6', dot: '#5eead4', border: '#0d9488', label: 'Diesel + CNG' },
+  'Electric (EV)':   { color: '#3b82f6', dot: '#93c5fd', border: '#2563eb', label: 'Electric (EV)' },
+  'Petrol + Hybrid': { color: '#a855f7', dot: '#d8b4fe', border: '#9333ea', label: 'Petrol + Hybrid' },
 };
 
 export default function Predict() {
@@ -20,8 +18,11 @@ export default function Predict() {
   const [brand, setBrand] = useState('');
   const [brandSearch, setBrandSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showBodyOptions, setShowBodyOptions] = useState(false);
   const brandRef = useRef(null);
-  const [carModel, setCarModel] = useState('');
+  const bodyTypeRef = useRef(null);
+  const [bodyType, setBodyType] = useState('');
+  const [segment, setSegment] = useState('Mid-Range');
   const [year, setYear] = useState(2020);
   const [month, setMonth] = useState(1);
   const [mileage, setMileage] = useState(50);
@@ -31,7 +32,6 @@ export default function Predict() {
   const [fuelEfficiency, setFuelEfficiency] = useState(18);
   const [fuelType, setFuelType] = useState('Petrol');
   const [transmission, setTransmission] = useState('Manual');
-  const [sellerType, setSellerType] = useState('Dealer');
   const [condition, setCondition] = useState('Good');
   const [owners, setOwners] = useState(1);
   const [regType, setRegType] = useState('Private');
@@ -44,7 +44,7 @@ export default function Predict() {
       setOptions(o);
       setBrand('');
       setBrandSearch('');
-      setCarModel('');
+      setBodyType(o.body_types?.[0] || 'SUV');
       setFetching(false);
     });
   }, []);
@@ -54,7 +54,8 @@ export default function Predict() {
     setResult(null);
     const res = await predictPrice({
       brand,
-      car_model: carModel,
+      body_type: bodyType,
+      segment,
       year: parseInt(year),
       month: parseInt(month),
       mileage_k: parseFloat(mileage),
@@ -67,7 +68,6 @@ export default function Predict() {
       condition,
       owners: parseInt(owners),
       reg_type: regType,
-      seller_type: sellerType,
     });
     setTimeout(() => {
       setResult(res);
@@ -86,14 +86,12 @@ export default function Predict() {
     setBrand(b);
     setBrandSearch(b);
     setShowSuggestions(false);
-    if (options?.models_by_brand[b]) {
-        setCarModel(options.models_by_brand[b][0] || '');
-    }
   };
 
   useEffect(() => {
     const handle = (e) => {
       if (brandRef.current && !brandRef.current.contains(e.target)) setShowSuggestions(false);
+      if (bodyTypeRef.current && !bodyTypeRef.current.contains(e.target)) setShowBodyOptions(false);
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
@@ -129,7 +127,7 @@ export default function Predict() {
                     onChange={(e) => {
                       setBrandSearch(e.target.value);
                       setShowSuggestions(true);
-                      if (e.target.value !== brand) setBrand(''); // clear actual brand if typing
+                      if (e.target.value !== brand) setBrand('');
                     }}
                     onFocus={() => setShowSuggestions(true)}
                   />
@@ -142,22 +140,39 @@ export default function Predict() {
                   )}
                 </div>
               </div>
+              <div className="form-group" style={{ position: 'relative' }} ref={bodyTypeRef}>
+                <label className="form-label">Body Type</label>
+                <div 
+                  className="form-select" 
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                  onClick={() => setShowBodyOptions(!showBodyOptions)}
+                >
+                  {bodyType || 'Select Body Type'}
+                </div>
+                {showBodyOptions && (
+                  <ul className="autocomplete-list" style={{ marginTop: '8px' }}>
+                    {(options.body_types || []).map(b => (
+                      <li 
+                        key={b} 
+                        className={`autocomplete-item ${bodyType === b ? 'selected' : ''}`} 
+                        onClick={() => { setBodyType(b); setShowBodyOptions(false); }}
+                      >
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
 
-              <div className="form-group">
-                <label className="form-label">Model</label>
-                <select 
-                  className="form-select" 
-                  value={carModel} 
-                  onChange={(e) => setCarModel(e.target.value)}
-                  disabled={!brand}
-                >
-                  {!brand && <option value="">Select a brand first</option>}
-                  {brand && (options.models_by_brand[brand] || []).map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
+            <div className="form-group">
+              <label className="form-label">Segment / Tier</label>
+              <div className="segment-grid">
+                {(options.segments || []).map(s => (
+                  <button key={s} className={`segment-btn ${segment === s ? 'active' : ''}`} onClick={() => setSegment(s)}>{s}</button>
+                ))}
               </div>
+            </div>
 
             <div className="form-row" style={{marginTop: '16px'}}>
               <div className="form-group">
@@ -249,14 +264,6 @@ export default function Predict() {
                 <input type="range" className="slider" min={2} max={14} step="1" value={seats} onChange={(e) => setSeats(e.target.value)} />
                 <div className="slider-range"><span>2</span><span>14</span></div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Seller Type</label>
-                <div className="radio-group" style={{gridTemplateColumns: 'repeat(3, 1fr)'}}>
-                  {options.seller_types.map(s => (
-                    <button key={s} className={`radio-btn ${sellerType === s ? 'active' : ''}`} onClick={() => setSellerType(s)} style={{fontSize: '0.7rem', padding: '10px 4px'}}>{s}</button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <h3 className="form-card__title" style={{ marginTop: '8px' }}>Ownership & Condition</h3>
@@ -295,7 +302,7 @@ export default function Predict() {
             <button 
               className="predict-btn" 
               onClick={handlePredict} 
-              disabled={loading || !brand || !carModel}
+              disabled={loading || !brand}
             >
               {loading ? (
                 <span className="predict-btn__loading"><div className="loader loader--small"></div> Analyzing...</span>
@@ -320,12 +327,12 @@ export default function Predict() {
                   <span className="result-detail__value">{brand}</span>
                 </div>
                 <div className="result-detail">
-                  <span className="result-detail__label">Model</span>
-                  <span className="result-detail__value">{carModel}</span>
+                  <span className="result-detail__label">Body Type</span>
+                  <span className="result-detail__value">{bodyType}</span>
                 </div>
                 <div className="result-detail">
-                  <span className="result-detail__label">Type / Segment</span>
-                  <span className="result-detail__value">{result.body_type} / {result.segment}</span>
+                  <span className="result-detail__label">Segment</span>
+                  <span className="result-detail__value">{segment}</span>
                 </div>
                 <div className="result-detail">
                   <span className="result-detail__label">Manufactured</span>
@@ -364,7 +371,7 @@ export default function Predict() {
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </div>
               <h3>Select a vehicle to appraise</h3>
-              <p>Choose a brand, model, and specifications on the left to instantly calculate its current market value based on {options?.total_cars?.toLocaleString('en-IN') || 8128} real market transactions.</p>
+              <p>Choose a brand, body type, and specifications on the left to instantly calculate its current market value based on {options?.total_cars?.toLocaleString('en-IN') || 8128} real market transactions.</p>
             </div>
           )}
         </div>

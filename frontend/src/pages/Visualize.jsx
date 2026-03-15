@@ -10,8 +10,8 @@ import './Visualize.css';
 const FEATURES = [
   { key: 'year', label: 'Year', unit: '' },
   { key: 'mileage_k', label: 'Mileage', unit: 'k km' },
+  { key: 'max_power', label: 'Max Power', unit: 'bhp' },
   { key: 'engine_vol', label: 'Engine Volume', unit: 'L' },
-  { key: 'age', label: 'Age', unit: 'years' },
 ];
 
 export default function Visualize() {
@@ -36,7 +36,7 @@ export default function Visualize() {
   }, [feature]);
 
   const activeFeature = FEATURES.find((f) => f.key === feature);
-  const corrCols = ['year', 'mileage_k', 'engine_vol', 'price_inr'];
+  const corrCols = ['year', 'mileage_k', 'max_power', 'price_inr'];
 
   return (
     <div className="visualize">

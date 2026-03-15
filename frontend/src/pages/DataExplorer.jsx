@@ -17,14 +17,16 @@ export default function DataExplorer() {
 
   const columns = [
     { key: 'brand', label: 'Brand', type: 'text' },
-    { key: 'car_model', label: 'Model', type: 'text' },
     { key: 'body_type', label: 'Body', type: 'text' },
     { key: 'segment', label: 'Segment', type: 'badge' },
     { key: 'year', label: 'Year', type: 'num' },
     { key: 'mileage_k', label: 'Mileage (k)', type: 'num' },
+    { key: 'max_power', label: 'Power (bhp)', type: 'num' },
+    { key: 'fuel_efficiency', label: 'Efficiency (kmpl)', type: 'num' },
     { key: 'engine_vol', label: 'Engine (L)', type: 'num' },
     { key: 'fuel_type', label: 'Fuel', type: 'text' },
     { key: 'transmission', label: 'Trans', type: 'text' },
+    { key: 'seats', label: 'Seats', type: 'num' },
     { key: 'owners', label: 'Owners', type: 'num' },
     { key: 'price_inr', label: 'Price (₹)', type: 'price' },
   ];
@@ -133,9 +135,13 @@ export default function DataExplorer() {
                 <td><span className="segment-badge" style={{ background: segmentColors[row.segment] + '20', color: segmentColors[row.segment] }}>{row.segment}</span></td>
                 <td>{row.year}</td>
                 <td>{row.mileage_k?.toLocaleString('en-IN')}</td>
+                <td>{row.max_power}</td>
+                <td>{row.fuel_efficiency}</td>
                 <td>{row.engine_vol}L</td>
                 <td>{row.fuel_type}</td>
                 <td>{row.transmission}</td>
+                <td>{row.seats}</td>
+                <td>{row.seller_type}</td>
                 <td>{row.owners}</td>
                 <td className="price-cell">{formatINR(row.price_inr)}</td>
               </tr>

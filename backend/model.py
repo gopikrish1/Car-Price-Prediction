@@ -28,25 +28,16 @@ class CarPriceModel:
         self.df = None
         self.encoders = {}
         self.feature_cols = []
-        self.cat_cols = ['brand', 'car_model', 'body_type', 'fuel_type', 'segment',
-                         'transmission', 'condition', 'reg_type', 'seller_type']
+        self.cat_cols = ['brand', 'body_type', 'fuel_type', 'segment',
+                         'transmission', 'condition', 'reg_type']
         self.num_cols = ['year', 'age', 'mileage_k', 'engine_vol', 'owners',
                          'fuel_efficiency', 'max_power', 'seats',
                          'mileage_per_year', 'age_squared', 'brand_tier']
-        self.model_attributes = {} # Store body_type and segment for each brand+model
         self._load_and_train()
 
     def _load_and_train(self):
         csv_path = os.path.join(os.path.dirname(__file__), "..", "cars_india.csv")
         self.df = pd.read_csv(csv_path)
-
-        # Build attribute map for auto-filling body type and segment based on model
-        for _, row in self.df.drop_duplicates(subset=['brand', 'car_model']).iterrows():
-            key = f"{row['brand']}|{row['car_model']}"
-            self.model_attributes[key] = {
-                'body_type': row['body_type'],
-                'segment': row['segment']
-            }
 
         train_df = self.df.copy()
 
@@ -87,24 +78,18 @@ class CarPriceModel:
         print(f"Model trained on {len(self.df)} records. Train R²={self.train_score}, CV R²={self.cv_score}")
         print(f"Top features: {list(self.feature_importance.items())[:5]}")
 
-    def predict(self, brand, car_model, year, month, mileage_k, engine_vol,
-                fuel_type, transmission, condition, owners, reg_type, seller_type,
+    def predict(self, brand, body_type, segment, year, month, mileage_k, engine_vol,
+                fuel_type, transmission, condition, owners, reg_type,
                 fuel_efficiency, max_power, seats):
         """Predict price for given car specs."""
         fractional_year = year + (month - 1) / 12
         age = 2026.25 - fractional_year
         row = {}
 
-        # Auto-infer body type and segment from the learned mappings!
-        key = f"{brand}|{car_model}"
-        attrs = self.model_attributes.get(key, {'body_type': 'SUV', 'segment': 'Mid-Range'})
-        body_type = attrs['body_type']
-        segment = attrs['segment']
-
         cat_values = {
-            'brand': brand, 'car_model': car_model, 'body_type': body_type, 'fuel_type': fuel_type,
+            'brand': brand, 'body_type': body_type, 'fuel_type': fuel_type,
             'segment': segment, 'transmission': transmission,
-            'condition': condition, 'reg_type': reg_type, 'seller_type': seller_type
+            'condition': condition, 'reg_type': reg_type
         }
 
         for col, val in cat_values.items():
@@ -138,21 +123,16 @@ class CarPriceModel:
             'price': max(round(pred, 0), 0),
             'price_low': low,
             'price_high': high,
-            'body_type': body_type, # Return inferred values so UI can display them
-            'segment': segment
         }
 
     def get_options(self):
-        brands_models = {}
-        for b, group in self.df.groupby('brand'):
-            brands_models[b] = sorted(group['car_model'].unique().tolist())
-
         return {
             'brands': sorted(self.df['brand'].unique().tolist()),
-            'models_by_brand': brands_models,
+            'body_types': sorted(self.df['body_type'].unique().tolist()),
+            'segments': sorted(self.df['segment'].unique().tolist()),
             'fuel_types': sorted(self.df['fuel_type'].unique().tolist()),
             'transmissions': sorted(self.df['transmission'].unique().tolist()),
-            'seller_types': sorted(self.df['seller_type'].unique().tolist()),
+
             'conditions': ['Excellent', 'Good', 'Fair', 'Poor'],
             'reg_types': ['Private', 'Taxi', 'Bharat'],
             'year_range': {'min': int(self.df['year'].min()), 'max': 2026},
