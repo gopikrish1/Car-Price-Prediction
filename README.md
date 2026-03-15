@@ -6,8 +6,8 @@ Our application utilizes real-world Kaggle data (CarDekho dataset) covering over
 
 ## Features
 
-- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form with 95.4% Cross-Validation accuracy.
-- **Data Explorer:** Interactively browse, search, and sort through the entire real-world Indian used cars dataset (8,128 records).
+- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form with 95.4% Cross-Validation accuracy. The model calculates precise valuations while adjusting for vehicle **Condition**, **Number of Owners**, and **Registration Type** (Private, Commercial/Taxi, Bharat BH).
+- **Data Explorer:** Interactively browse, search, and sort through the entire real-world Indian used cars dataset (8,128 records) with properly aligned, responsive data tables.
 - **Dashboard Analytics:** High-level metrics, top brands distributions, body type pies, and average price per segment visualisations.
 - **Visualisations:** Dynamic interactive scatter charts and correlation matrices to explore relationships between car features and market price.
 

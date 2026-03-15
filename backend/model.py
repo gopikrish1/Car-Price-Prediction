@@ -115,6 +115,35 @@ class CarPriceModel:
         X = pd.DataFrame([row])[self.feature_cols]
         pred = self.model.predict(X)[0]
 
+        # Apply explicit condition modifiers
+        condition_modifiers = {
+            'Excellent': 1.05,
+            'Good': 1.0,
+            'Fair': 0.85,
+            'Poor': 0.70
+        }
+        
+        # Apply explicit reg_type modifiers
+        reg_type_modifiers = {
+            'Private': 1.05,
+            'Bharat': 0.95,
+            'Taxi': 0.80
+        }
+        
+        # Apply explicit owner modifiers
+        owner_modifiers = {
+            1: 1.0,
+            2: 0.85,
+            3: 0.75,
+            4: 0.65,
+            5: 0.50
+        }
+        
+        mod_cond = condition_modifiers.get(condition, 1.0)
+        mod_reg = reg_type_modifiers.get(reg_type, 1.0)
+        mod_owner = owner_modifiers.get(owners, 1.0)
+        pred = pred * mod_cond * mod_reg * mod_owner
+
         margin = pred * 0.12
         low = max(round(pred - margin, 0), 0)
         high = round(pred + margin, 0)
