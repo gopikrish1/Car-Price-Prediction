@@ -17,6 +17,7 @@ export default function DataExplorer() {
 
   const columns = [
     { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'car_model', label: 'Model', type: 'text' },
     { key: 'body_type', label: 'Body', type: 'text' },
     { key: 'segment', label: 'Segment', type: 'badge' },
     { key: 'year', label: 'Year', type: 'num' },
@@ -127,6 +128,7 @@ export default function DataExplorer() {
               <tr key={i}>
                 <td className="row-num">{i + 1}</td>
                 <td className="brand-cell">{row.brand}</td>
+                <td>{row.car_model}</td>
                 <td>{row.body_type}</td>
                 <td><span className="segment-badge" style={{ background: segmentColors[row.segment] + '20', color: segmentColors[row.segment] }}>{row.segment}</span></td>
                 <td>{row.year}</td>

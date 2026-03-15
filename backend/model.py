@@ -13,7 +13,7 @@ BRAND_TIER_MAP = {
     'Opel': 1, 'Daewoo': 1, 'Ashok': 1,
     'Hyundai': 2, 'Kia': 2, 'Honda': 2, 'Skoda': 2, 'Volkswagen': 2,
     'MG': 2, 'Mahindra': 2, 'Toyota': 2, 'Jeep': 2, 'Ford': 2,
-    'Bmw': 3, 'Mercedes-Benz': 3, 'Audi': 3, 'Volvo': 3, 'Mini': 3,
+    'BMW': 3, 'Mercedes-Benz': 3, 'Audi': 3, 'Volvo': 3, 'Mini': 3,
     'Jaguar': 3, 'Land Rover': 3, 'Lexus': 3,
     'Porsche': 4, 'Ferrari': 4, 'Lamborghini': 4, 'Rolls-Royce': 4,
     'Maserati': 4, 'Bentley': 4,
@@ -28,15 +28,25 @@ class CarPriceModel:
         self.df = None
         self.encoders = {}
         self.feature_cols = []
-        self.cat_cols = ['brand', 'body_type', 'fuel_type', 'segment',
-                         'transmission', 'condition', 'reg_type']
+        self.cat_cols = ['brand', 'car_model', 'body_type', 'fuel_type', 'segment',
+                         'transmission', 'condition', 'reg_type', 'seller_type']
         self.num_cols = ['year', 'age', 'mileage_k', 'engine_vol', 'owners',
+                         'fuel_efficiency', 'max_power', 'seats',
                          'mileage_per_year', 'age_squared', 'brand_tier']
+        self.model_attributes = {} # Store body_type and segment for each brand+model
         self._load_and_train()
 
     def _load_and_train(self):
         csv_path = os.path.join(os.path.dirname(__file__), "..", "cars_india.csv")
         self.df = pd.read_csv(csv_path)
+
+        # Build attribute map for auto-filling body type and segment based on model
+        for _, row in self.df.drop_duplicates(subset=['brand', 'car_model']).iterrows():
+            key = f"{row['brand']}|{row['car_model']}"
+            self.model_attributes[key] = {
+                'body_type': row['body_type'],
+                'segment': row['segment']
+            }
 
         train_df = self.df.copy()
 
@@ -53,7 +63,7 @@ class CarPriceModel:
 
         # Train Gradient Boosting
         self.model = GradientBoostingRegressor(
-            n_estimators=300,
+            n_estimators=350,
             max_depth=6,
             learning_rate=0.08,
             min_samples_split=10,
@@ -77,17 +87,24 @@ class CarPriceModel:
         print(f"Model trained on {len(self.df)} records. Train R²={self.train_score}, CV R²={self.cv_score}")
         print(f"Top features: {list(self.feature_importance.items())[:5]}")
 
-    def predict(self, brand, body_type, year, month, mileage_k, engine_vol,
-                fuel_type, transmission, condition, owners, reg_type, segment):
+    def predict(self, brand, car_model, year, month, mileage_k, engine_vol,
+                fuel_type, transmission, condition, owners, reg_type, seller_type,
+                fuel_efficiency, max_power, seats):
         """Predict price for given car specs."""
         fractional_year = year + (month - 1) / 12
         age = 2026.25 - fractional_year
         row = {}
 
+        # Auto-infer body type and segment from the learned mappings!
+        key = f"{brand}|{car_model}"
+        attrs = self.model_attributes.get(key, {'body_type': 'SUV', 'segment': 'Mid-Range'})
+        body_type = attrs['body_type']
+        segment = attrs['segment']
+
         cat_values = {
-            'brand': brand, 'body_type': body_type, 'fuel_type': fuel_type,
+            'brand': brand, 'car_model': car_model, 'body_type': body_type, 'fuel_type': fuel_type,
             'segment': segment, 'transmission': transmission,
-            'condition': condition, 'reg_type': reg_type,
+            'condition': condition, 'reg_type': reg_type, 'seller_type': seller_type
         }
 
         for col, val in cat_values.items():
@@ -103,6 +120,9 @@ class CarPriceModel:
         row['mileage_k'] = mileage_k
         row['engine_vol'] = engine_vol
         row['owners'] = owners
+        row['fuel_efficiency'] = fuel_efficiency
+        row['max_power'] = max_power
+        row['seats'] = seats
         row['mileage_per_year'] = round(mileage_k / max(age, 0.5), 1)
         row['age_squared'] = round(age ** 2, 1)
         row['brand_tier'] = BRAND_TIER_MAP.get(brand, 2)
@@ -118,31 +138,37 @@ class CarPriceModel:
             'price': max(round(pred, 0), 0),
             'price_low': low,
             'price_high': high,
+            'body_type': body_type, # Return inferred values so UI can display them
+            'segment': segment
         }
 
     def get_options(self):
+        brands_models = {}
+        for b, group in self.df.groupby('brand'):
+            brands_models[b] = sorted(group['car_model'].unique().tolist())
+
         return {
             'brands': sorted(self.df['brand'].unique().tolist()),
-            'body_types': sorted(self.df['body_type'].unique().tolist()),
+            'models_by_brand': brands_models,
             'fuel_types': sorted(self.df['fuel_type'].unique().tolist()),
-            'segments': sorted(self.df['segment'].unique().tolist()),
             'transmissions': sorted(self.df['transmission'].unique().tolist()),
+            'seller_types': sorted(self.df['seller_type'].unique().tolist()),
             'conditions': ['Excellent', 'Good', 'Fair', 'Poor'],
             'reg_types': ['Private', 'Taxi', 'Bharat'],
             'year_range': {'min': int(self.df['year'].min()), 'max': 2026},
             'months': list(range(1, 13)),
             'mileage_range': {'min': 0, 'max': int(self.df['mileage_k'].max())},
-            'engine_vol_range': {
-                'min': float(self.df['engine_vol'].min()),
-                'max': float(self.df['engine_vol'].max()),
-            },
+            'engine_vol_range': {'min': float(self.df['engine_vol'].min()), 'max': float(self.df['engine_vol'].max())},
+            'power_range': {'min': float(self.df['max_power'].min()), 'max': float(self.df['max_power'].max())},
+            'efficiency_range': {'min': float(self.df['fuel_efficiency'].min()), 'max': float(self.df['fuel_efficiency'].max())},
+            'total_cars': len(self.df)
         }
 
     def get_dataset(self):
         return self.df.to_dict(orient='records')
 
     def get_stats(self):
-        num_df = self.df[['year', 'mileage_k', 'engine_vol', 'owners', 'price_inr']]
+        num_df = self.df[['year', 'mileage_k', 'max_power', 'price_inr']]
         desc = num_df.describe().round(1).to_dict()
         corr = num_df.corr().round(4).to_dict()
         return {
@@ -160,7 +186,7 @@ class CarPriceModel:
         return {'counts': counts, 'avg_price': avg_price}
 
     def get_scatter_data(self, feature):
-        valid = ['mileage_k', 'engine_vol', 'year', 'age', 'owners']
+        valid = ['mileage_k', 'engine_vol', 'year', 'max_power', 'owners']
         if feature not in valid:
             feature = 'mileage_k'
         return {

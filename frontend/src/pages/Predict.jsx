@@ -22,14 +22,16 @@ export default function Predict() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const brandRef = useRef(null);
   const [carModel, setCarModel] = useState('');
-  const [bodyType, setBodyType] = useState('');
-  const [segment, setSegment] = useState('Mid-Range');
   const [year, setYear] = useState(2020);
   const [month, setMonth] = useState(1);
   const [mileage, setMileage] = useState(50);
   const [engineVol, setEngineVol] = useState(1.5);
+  const [seats, setSeats] = useState(5);
+  const [maxPower, setMaxPower] = useState(80);
+  const [fuelEfficiency, setFuelEfficiency] = useState(18);
   const [fuelType, setFuelType] = useState('Petrol');
   const [transmission, setTransmission] = useState('Manual');
+  const [sellerType, setSellerType] = useState('Dealer');
   const [condition, setCondition] = useState('Good');
   const [owners, setOwners] = useState(1);
   const [regType, setRegType] = useState('Private');
@@ -43,7 +45,6 @@ export default function Predict() {
       setBrand('');
       setBrandSearch('');
       setCarModel('');
-      setBodyType(o.body_types[0] || '');
       setFetching(false);
     });
   }, []);
@@ -54,17 +55,19 @@ export default function Predict() {
     const res = await predictPrice({
       brand,
       car_model: carModel,
-      body_type: bodyType,
       year: parseInt(year),
       month: parseInt(month),
       mileage_k: parseFloat(mileage),
       engine_vol: parseFloat(engineVol),
+      seats: parseInt(seats),
+      max_power: parseFloat(maxPower),
+      fuel_efficiency: parseFloat(fuelEfficiency),
       fuel_type: fuelType,
       transmission,
       condition,
       owners: parseInt(owners),
       reg_type: regType,
-      segment,
+      seller_type: sellerType,
     });
     setTimeout(() => {
       setResult(res);
@@ -141,7 +144,6 @@ export default function Predict() {
               </div>
             </div>
 
-            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Model</label>
                 <select 
@@ -156,24 +158,8 @@ export default function Predict() {
                   ))}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Body Type</label>
-                <select className="form-select" value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
-                  {options.body_types.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            </div>
 
-            <div className="form-group">
-              <label className="form-label">Segment / Tier</label>
-              <div className="segment-grid">
-                {options.segments.map(s => (
-                  <button key={s} className={`segment-btn ${segment === s ? 'active' : ''}`} onClick={() => setSegment(s)}>{s}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="form-row">
+            <div className="form-row" style={{marginTop: '16px'}}>
               <div className="form-group">
                 <label className="form-label">Transmission</label>
                 <div className="radio-group">
@@ -238,7 +224,42 @@ export default function Predict() {
               </div>
             </div>
 
-            <h3 className="form-card__title" style={{ marginTop: '8px' }}>Ownership & Registration</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  Max Power <span className="form-value">{parseInt(maxPower)} bhp</span>
+                </label>
+                <input type="range" className="slider" min={options.power_range.min} max={options.power_range.max} step="1" value={maxPower} onChange={(e) => setMaxPower(e.target.value)} />
+                <div className="slider-range"><span>{options.power_range.min}</span><span>{options.power_range.max}</span></div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Fuel Efficiency <span className="form-value">{parseFloat(fuelEfficiency).toFixed(1)} kmpl</span>
+                </label>
+                <input type="range" className="slider" min={options.efficiency_range.min} max={options.efficiency_range.max} step="0.5" value={fuelEfficiency} onChange={(e) => setFuelEfficiency(e.target.value)} />
+                <div className="slider-range"><span>{options.efficiency_range.min}</span><span>{options.efficiency_range.max}</span></div>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  Seats <span className="form-value">{seats}</span>
+                </label>
+                <input type="range" className="slider" min={2} max={14} step="1" value={seats} onChange={(e) => setSeats(e.target.value)} />
+                <div className="slider-range"><span>2</span><span>14</span></div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Seller Type</label>
+                <div className="radio-group" style={{gridTemplateColumns: 'repeat(3, 1fr)'}}>
+                  {options.seller_types.map(s => (
+                    <button key={s} className={`radio-btn ${sellerType === s ? 'active' : ''}`} onClick={() => setSellerType(s)} style={{fontSize: '0.7rem', padding: '10px 4px'}}>{s}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <h3 className="form-card__title" style={{ marginTop: '8px' }}>Ownership & Condition</h3>
 
             <div className="form-group">
               <label className="form-label">Condition</label>
@@ -303,16 +324,16 @@ export default function Predict() {
                   <span className="result-detail__value">{carModel}</span>
                 </div>
                 <div className="result-detail">
-                  <span className="result-detail__label">Type</span>
-                  <span className="result-detail__value">{bodyType}</span>
+                  <span className="result-detail__label">Type / Segment</span>
+                  <span className="result-detail__value">{result.body_type} / {result.segment}</span>
                 </div>
                 <div className="result-detail">
                   <span className="result-detail__label">Manufactured</span>
                   <span className="result-detail__value">{MONTH_NAMES[month - 1]} {year}</span>
                 </div>
                 <div className="result-detail">
-                  <span className="result-detail__label">Engine</span>
-                  <span className="result-detail__value">{parseFloat(engineVol).toFixed(1)}L</span>
+                  <span className="result-detail__label">Performance</span>
+                  <span className="result-detail__value">{parseInt(maxPower)} bhp · {parseFloat(fuelEfficiency).toFixed(1)} kmpl</span>
                 </div>
                 <div className="result-detail">
                   <span className="result-detail__label">Fuel</span>
