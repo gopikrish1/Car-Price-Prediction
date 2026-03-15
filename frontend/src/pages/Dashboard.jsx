@@ -71,11 +71,18 @@ export default function Dashboard() {
         <p className="page-subtitle">{totalCars.toLocaleString('en-IN')} vehicles across {brands ? Object.keys(brands.counts).length : 0} brands</p>
       </div>
 
-      <div className="stats-grid">
-        <StatsCard icon="#" label="Total Cars" value={totalCars.toLocaleString('en-IN')} color="purple" delay={1} />
-        <StatsCard icon="₹" label="Avg Price" value={formatINR(avgPrice)} color="green" delay={2} />
-        <StatsCard icon="↑" label="Highest Price" value={formatINR(maxPrice)} color="blue" delay={3} />
-        <StatsCard icon="%" label="Model Accuracy" value={`${(accuracy * 100).toFixed(1)}%`} color="orange" delay={4} />
+      <div className="dashboard-hero">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Unlock Real-Time Data Intelligence for the Indian Automotive Market.
+          </h1>
+          <p className="hero-description">
+            AutoValuate empowers dealerships, buyers, and industry professionals with advanced machine learning 
+            to determine accurate, spec-based vehicle valuations. Powered by an actively-learning model trained 
+            on {totalCars.toLocaleString('en-IN')} real market transactions across {brands ? Object.keys(brands.counts).length : 0} manufacturers, 
+            our intelligence engine provides granular insights from budget hatchbacks up to ultra-luxury segment pricing.
+          </p>
+        </div>
       </div>
 
       <div className="charts-grid">
