@@ -9,8 +9,24 @@ export default function Navbar() {
       <div className="navbar__inner">
         <NavLink to="/" className="navbar__brand" onClick={() => setOpen(false)}>
           <span className="navbar__brand-icon" style={{ display: 'flex', alignItems: 'center', background: 'transparent', padding: 0 }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary-600)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+            <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="navGradV" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="var(--primary-400)" />
+                  <stop offset="100%" stopColor="var(--primary-800)" />
+                </linearGradient>
+                <linearGradient id="navGradA" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--primary-700)" />
+                  <stop offset="100%" stopColor="var(--primary-300)" />
+                </linearGradient>
+                <filter id="navShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="var(--primary-900)" floodOpacity="0.3" />
+                </filter>
+              </defs>
+              <g filter="url(#navShadow)">
+                <path d="M22 28 H38 L50 52 L62 28 H78 L50 84 Z" fill="url(#navGradV)" />
+                <path d="M50 16 L22 72 H38 L50 48 L62 72 H78 Z" fill="url(#navGradA)" />
+              </g>
             </svg>
           </span>
           <div style={{ display: "flex", flexDirection: "column", marginLeft: "8px", lineHeight: 1.2 }}>
