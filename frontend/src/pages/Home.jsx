@@ -44,11 +44,20 @@ export default function Home() {
     <div className="page-container" id="home-page">
       {/* Hero */}
       <section className="home-hero">
-        <h1>AutoValuate</h1>
-        <p>
-          Predict used-car prices with machine learning — powered by three
-          models trained on the UCI Automobile dataset.
-        </p>
+        {/* Decorative orbs */}
+        <div className="home-hero__orb home-hero__orb--1" />
+        <div className="home-hero__orb home-hero__orb--2" />
+        <div className="home-hero__orb home-hero__orb--3" />
+        <div className="home-hero__accent" />
+
+        <div className="home-hero__content">
+          <h1>AutoValuate</h1>
+          <p>
+            Discover the true market value of used cars. Our intelligent prediction
+            engine leverages an ensemble of machine learning models—trained on the
+            UCI Automobile dataset—to deliver highly accurate, data-driven valuations.
+          </p>
+        </div>
       </section>
 
       {/* Stat bar */}
