@@ -33,7 +33,7 @@ const MODEL_OPTIONS = [
   { key: "linear_regression", label: "Linear Regression" },
   { key: "decision_tree", label: "Decision Tree" },
   { key: "random_forest", label: "Random Forest" },
-  { key: "ensemble", label: "Ensemble Average" },
+  { key: "ensemble", label: "Ultimate Ensemble" },
 ];
 
 const BODY_STYLE_OPTIONS = [

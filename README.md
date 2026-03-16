@@ -6,11 +6,11 @@ Our application utilizes the classic **UCI Automobile dataset** to provide preci
 
 ## ✨ Features
 
-- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form. The system dynamically runs your specifications through a sophisticated Machine Learning pipeline.
-- **Ensemble Learning:** Choose between Linear Regression, Decision Tree, and Random Forest models, or use our **Ensemble Average** algorithm to get a balanced prediction aggregating the strengths of all models.
+- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form with robust real-time constraint validation. The system dynamically runs your specifications through a sophisticated Machine Learning pipeline.
+- **Ensemble Learning:** Choose between Linear Regression, Decision Tree, and Random Forest models, or use our **Ultimate Ensemble** algorithm to get a balanced prediction aggregating the strengths of all models.
 - **Data Explorer:** Interactively browse, search, and sort through the dataset with properly aligned, responsive data tables.
 - **Visualisations:** Dynamic interactive scatter charts and bar graphs (powered by Recharts) to explore relationships between car features such as Horsepower, Engine Size, MPG, and Market Price.
-- **Responsive UI:** A stunning, modern "Glassmorphism" interface built with pure CSS and React.
+- **Premium UI / UX:** A stunning, modern "Glassmorphism" interface built with pure CSS and React. Features a custom geometric interlocking A/V lettermark logo, custom dropdown selectors, and seamless micro-animations.
 
 ## 💻 Tech Stack
 
