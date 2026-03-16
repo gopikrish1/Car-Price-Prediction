@@ -1,30 +1,31 @@
 # AutoValuate - Car Price Intelligence
 
-AutoValuate is a comprehensive, AI-powered car price prediction and analysis tool tailored for the Indian used car market. It features a modern React (Vite) frontend for an immersive user experience, and a robust FastAPI backend powered by an advanced Gradient Boosting ML model.
+AutoValuate is a comprehensive, full-stack car resale value prediction application. It features a modern React (Vite) frontend for an immersive user experience, and a robust FastAPI backend powered by Machine Learning models.
 
-Our application utilizes real-world Kaggle data (CarDekho dataset) covering over 8,000 Indian used cars across 32 brands to provide highly accurate, data-driven market valuations.
+Our application utilizes the classic **UCI Automobile dataset** to provide precise data-driven market valuations based on vehicle specifications.
 
-## Features
+## ✨ Features
 
-- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form with 95.4% Cross-Validation accuracy. The model calculates precise valuations while adjusting for vehicle **Condition**, **Number of Owners**, and **Registration Type** (Private, Commercial/Taxi, Bharat BH).
-- **Data Explorer:** Interactively browse, search, and sort through the entire real-world Indian used cars dataset (8,128 records) with properly aligned, responsive data tables.
-- **Dashboard Analytics:** High-level metrics, top brands distributions, body type pies, and average price per segment visualisations.
-- **Visualisations:** Dynamic interactive scatter charts and correlation matrices to explore relationships between car features and market price.
+- **Pricing Intelligence:** Predict car prices via an intuitive and feature-rich query form. The system dynamically runs your specifications through a sophisticated Machine Learning pipeline.
+- **Ensemble Learning:** Choose between Linear Regression, Decision Tree, and Random Forest models, or use our **Ensemble Average** algorithm to get a balanced prediction aggregating the strengths of all models.
+- **Data Explorer:** Interactively browse, search, and sort through the dataset with properly aligned, responsive data tables.
+- **Visualisations:** Dynamic interactive scatter charts and bar graphs (powered by Recharts) to explore relationships between car features such as Horsepower, Engine Size, MPG, and Market Price.
+- **Responsive UI:** A stunning, modern "Glassmorphism" interface built with pure CSS and React.
 
-## Tech Stack
+## 💻 Tech Stack
 
-- **Frontend:** React, Vite, Recharts (for data visualization), Vanilla CSS (glassmorphism UI)
-- **Backend:** FastAPI, Pandas, Scikit-learn (Gradient Boosting Regressor), Uvicorn
-- **Data:** Kaggle *Vehicle dataset from cardekho* (processed)
+- **Frontend:** React 19, Vite, React Router v7, Recharts (for data visualization), Axios, Vanilla CSS (glassmorphism UI)
+- **Backend:** FastAPI, Python, Pandas, NumPy, Scikit-learn (Linear Regression, Decision Tree Regressor, Random Forest Regressor), Uvicorn
+- **Data:** UCI Automobile dataset (processed)
 
-## Prerequisites
+## ⚙️ Prerequisites
 
 Make sure you have the following installed on your machine:
-- Node.js (v16+ recommended)
+- Node.js (v18+ recommended)
 - Python (v3.8+ recommended)
 - Git
 
-## Project Setup Instructions
+## 🛠️ Project Setup Instructions
 
 Follow these steps to set up the project locally:
 
@@ -57,7 +58,7 @@ pip install -r requirements.txt
 # Run the backend FastAPI server
 python -m uvicorn main:app --reload --port 8000
 ```
-The backend API will start running at `http://localhost:8000` or `http://127.0.0.1:8000`.
+The backend API will start running at `http://localhost:8000` or `http://127.0.0.1:8000`. You can access the interactive Swagger API documentation at `http://localhost:8000/docs`.
 
 ### 3. Frontend Setup
 
@@ -75,13 +76,13 @@ npm run dev
 
 The frontend will be accessible at `http://localhost:5173`. Open this URL in your browser to access the application.
 
-## Usage
+## 🚀 Usage
 
-1. **Dashboard:** Start here for a high-level overview of the dataset with dynamic charts.
-2. **Data Explorer:** Use the tabular view to search and filter real-world cars matching your queries.
-3. **Visualize:** Understand the dataset better by viewing relationships between Year, Mileage, Engine Volume, and Price.
-4. **Predict:** Enter specific details about a vehicle (Brand, Body Type, Manufacture Year, Fuel Type, Transmission, Condition, etc.) and hit "Predict Price" to get its current market valuation range.
+1. **Dashboard:** Start at the Home page to get an overview of the application and its capabilities.
+2. **Predict:** Enter specific details about a vehicle (Manufacturer, Body Style, Drive Wheel Type, Engine Size, Horsepower, Cylinders, MPG, etc.). Select an ML model (or the Ensemble) and hit "Predict Price" to get its current market valuation.
+3. **Data Explorer:** Navigate to the Dataset tab to view the tabular representation of the UCI Automobile data used for training.
+4. **Visualizations:** Go to the Visualizations tab to understand the dataset better by viewing relationships between features and pricing using interactive charts.
 
-## Authors
+## 👤 Authors
 
 - Gopi Krishnaa

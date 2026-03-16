@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 router = APIRouter()
 
-VALID_MODELS = {"linear_regression", "decision_tree", "random_forest"}
+VALID_MODELS = {"linear_regression", "decision_tree", "random_forest", "ensemble"}
 SAVED_DIR = os.path.join(os.path.dirname(__file__), "..", "saved_models")
 
 # Feature order MUST match FEATURE_COLS in preprocess.py
@@ -45,16 +45,6 @@ def predict(req: PredictRequest):
                    f"Must be one of: {', '.join(sorted(VALID_MODELS))}",
         )
 
-    pkl_path = os.path.join(SAVED_DIR, f"{req.model_name}.pkl")
-    if not os.path.exists(pkl_path):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Model file '{req.model_name}.pkl' not found. "
-                   "Please run train.py first.",
-        )
-
-    model = joblib.load(pkl_path)
-
     features = np.array([[
         req.engine_size,
         req.horsepower,
@@ -69,7 +59,29 @@ def predict(req: PredictRequest):
         req.highway_mpg,
     ]])
 
-    predicted = float(model.predict(features)[0])
+    if req.model_name == "ensemble":
+        predictions = []
+        for m_name in ["linear_regression", "decision_tree", "random_forest"]:
+            pkl_path = os.path.join(SAVED_DIR, f"{m_name}.pkl")
+            if not os.path.exists(pkl_path):
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Model file '{m_name}.pkl' not found. Please run train.py first.",
+                )
+            model = joblib.load(pkl_path)
+            predictions.append(float(model.predict(features)[0]))
+        predicted = sum(predictions) / len(predictions)
+    else:
+        pkl_path = os.path.join(SAVED_DIR, f"{req.model_name}.pkl")
+        if not os.path.exists(pkl_path):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Model file '{req.model_name}.pkl' not found. "
+                       "Please run train.py first.",
+            )
+
+        model = joblib.load(pkl_path)
+        predicted = float(model.predict(features)[0])
 
     return {
         "predicted_price": round(predicted, 2),

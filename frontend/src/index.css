@@ -324,7 +324,7 @@ body {
 /* Stat bar */
 .stat-bar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
   margin-bottom: 2.5rem;
 }
@@ -377,7 +377,7 @@ body {
 .feature-chip {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
   background: #fff;
   border: 1px solid var(--gray-200);
   border-radius: 10px;
@@ -392,22 +392,12 @@ body {
   background: var(--primary-50);
   transform: translateY(-2px);
 }
-.feature-chip__icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--primary-50);
-  color: var(--primary-600);
-  display: grid;
-  place-items: center;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
+
 
 /* Model cards */
 .model-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
   margin-bottom: 2.5rem;
 }
@@ -439,6 +429,7 @@ body {
 .model-card__badge--lr { background: #dbeafe; color: #1e40af; }
 .model-card__badge--dt { background: #d1fae5; color: #065f46; }
 .model-card__badge--rf { background: #ede9fe; color: #5b21b6; }
+.model-card__badge--ea { background: #ffedd5; color: #c2410c; }
 .model-card h3 {
   font-size: 1.05rem;
   font-weight: 700;
