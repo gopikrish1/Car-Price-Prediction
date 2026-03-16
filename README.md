@@ -27,7 +27,7 @@ Make sure you have the following installed on your machine:
 
 ## 🛠️ Project Setup Instructions
 
-Follow these steps to set up the project locally:
+Follow these steps to set up the project locally. **You will need two separate terminal windows**—one for the backend and one for the frontend.
 
 ### 1. Clone the repository
 
@@ -43,7 +43,7 @@ Open a terminal or command prompt and navigate to the `backend` directory:
 ```bash
 cd backend
 
-# Create a virtual environment (optional but recommended)
+# Create a virtual environment (highly recommended)
 python -m venv venv
 
 # Activate the virtual environment
@@ -60,9 +60,16 @@ python -m uvicorn main:app --reload --port 8000
 ```
 The backend API will start running at `http://localhost:8000` or `http://127.0.0.1:8000`. You can access the interactive Swagger API documentation at `http://localhost:8000/docs`.
 
+*(Optional)* **Retraining the Machine Learning Models:**
+Pre-trained models are already included in the `backend/saved_models` directory so you **don't have to** train them from scratch. However, if you would like to rebuild the `.pkl` files yourself based on the included dataset, run this command while your virtual environment is active:
+```bash
+# Make sure you are inside the `backend` directory
+python -m models.train
+```
+
 ### 3. Frontend Setup
 
-Open a new terminal or command prompt and navigate to the `frontend` directory:
+Open a **new, separate** terminal or command prompt, ensure you are in the project root, and navigate to the `frontend` directory:
 
 ```bash
 cd frontend
@@ -75,6 +82,12 @@ npm run dev
 ```
 
 The frontend will be accessible at `http://localhost:5173`. Open this URL in your browser to access the application.
+
+### 4. Common Troubleshooting
+
+- **Backend "Network Error":** If the frontend fails to communicate with the backend, ensure your FastAPI server is currently running in a separate terminal window on port `8000`.
+- **Port Conflict (Address already in use):** If port `8000` is already occupied by another application, restart the backend on a different port using `--port 8001`. Make sure to also update the `baseURL` in `frontend/src/api/axios.js` to match the new port, otherwise the frontend will not be able to connect!
+- **Missing Module Errors:** When starting the backend, if you encounter `ModuleNotFoundError: No module named 'fastapi'` or similar, ensure you have correctly activated your virtual environment before running `pip install -r requirements.txt`.
 
 ## 🚀 Usage
 
