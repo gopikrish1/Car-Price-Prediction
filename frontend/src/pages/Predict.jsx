@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import Spinner from "../components/Spinner";
 import ErrorBanner from "../components/ErrorBanner";
+import CustomSelect from "../components/CustomSelect";
 
 const MAKE_OPTIONS = [
   { label: "Alfa Romeo", value: 0 },
@@ -35,16 +36,45 @@ const MODEL_OPTIONS = [
   { key: "ensemble", label: "Ensemble Average" },
 ];
 
+const BODY_STYLE_OPTIONS = [
+  { label: "Sedan", value: 0 },
+  { label: "Hatchback", value: 1 },
+  { label: "Wagon", value: 2 },
+  { label: "Hardtop", value: 3 },
+  { label: "Convertible", value: 4 },
+];
+
+const DRIVE_WHEEL_OPTIONS = [
+  { label: "Front-Wheel Drive", value: 0 },
+  { label: "Rear-Wheel Drive", value: 1 },
+  { label: "All-Wheel Drive", value: 2 },
+];
+
+const CYLINDER_OPTIONS = [
+  { label: "2 Cylinders", value: 2 },
+  { label: "3 Cylinders", value: 3 },
+  { label: "4 Cylinders", value: 4 },
+  { label: "5 Cylinders", value: 5 },
+  { label: "6 Cylinders", value: 6 },
+  { label: "8 Cylinders", value: 8 },
+  { label: "12 Cylinders", value: 12 },
+];
+
+const FUEL_TYPE_OPTIONS = [
+  { label: "Gas", value: 0 },
+  { label: "Diesel", value: 1 },
+];
+
 const DEFAULTS = {
   engine_size: 130,
   horsepower: 100,
   width: 66,
   curb_weight: 2500,
-  drive_wheels: 0,
-  fuel_type: 0,
-  make: 19, // Toyota
-  body_style: 0, // Sedan
-  num_of_cylinders: 4,
+  drive_wheels: "",
+  fuel_type: "",
+  make: "",
+  body_style: "",
+  num_of_cylinders: "",
   city_mpg: 25,
   highway_mpg: 30,
 };
@@ -52,6 +82,7 @@ const DEFAULTS = {
 export default function Predict() {
   const [model, setModel] = useState("linear_regression");
   const [form, setForm] = useState({ ...DEFAULTS });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -60,8 +91,25 @@ export default function Predict() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handlePredict = async () => {
-    if (form.city_mpg === "" || form.highway_mpg === "") {
-      setError("Please enter both City and Highway MPG values.");
+    const errors = {};
+    if (form.make === "") errors.make = "Please select a manufacturer.";
+    if (form.body_style === "") errors.body_style = "Please select a body style.";
+    if (form.drive_wheels === "") errors.drive_wheels = "Please select a drive wheel type.";
+    if (form.num_of_cylinders === "") errors.num_of_cylinders = "Please select the number of cylinders.";
+    if (form.fuel_type === "") errors.fuel_type = "Please select a fuel type.";
+    
+    if (form.curb_weight === "" || form.curb_weight < 1500 || form.curb_weight > 4500) {
+      errors.curb_weight = "Must be between 1500 and 4500.";
+    }
+    if (form.city_mpg === "" || form.city_mpg < 10 || form.city_mpg > 60) {
+      errors.city_mpg = "Must be between 10 and 60.";
+    }
+    if (form.highway_mpg === "" || form.highway_mpg < 10 || form.highway_mpg > 60) {
+      errors.highway_mpg = "Must be between 10 and 60.";
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -72,9 +120,14 @@ export default function Predict() {
       const res = await api.post("/predict/", { ...form, model_name: model });
       setResult(res.data);
     } catch (err) {
-      setError(
-        err.response?.data?.detail || err.message || "Prediction failed"
-      );
+      const detail = err.response?.data?.detail;
+      let errorMsg = err.message || "Prediction failed";
+      if (Array.isArray(detail)) {
+        errorMsg = detail.map(d => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(". ");
+      } else if (typeof detail === "string") {
+        errorMsg = detail;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -85,6 +138,7 @@ export default function Predict() {
     setModel("linear_regression");
     setResult(null);
     setError("");
+    setFieldErrors({});
   };
 
   return (
@@ -123,51 +177,47 @@ export default function Predict() {
 
       <div className="predict-layout">
         {/* ── Form Card ── */}
-        <div className="form-card" id="predict-form">
+        <form className="form-card" id="predict-form" noValidate onSubmit={(e) => { e.preventDefault(); handlePredict(); }}>
           {/* Manufacturer dropdown */}
           <div className="form-group">
             <label>Manufacturer</label>
-            <select
-              value={form.make}
-              onChange={(e) => update("make", +e.target.value)}
+            <CustomSelect
               id="input-make"
-            >
-              {MAKE_OPTIONS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+              value={form.make}
+              onChange={(val) => update("make", val)}
+              options={MAKE_OPTIONS}
+              placeholder="Select Manufacturer..."
+              error={!!fieldErrors.make}
+            />
+            {fieldErrors.make && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.make}</span>}
           </div>
 
           {/* Body Style & Drive Wheels (Side-by-side) */}
           <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
             <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
               <label>Body Style</label>
-              <select
-                value={form.body_style}
-                onChange={(e) => update("body_style", +e.target.value)}
+              <CustomSelect
                 id="input-body-style"
-              >
-                <option value={0}>Sedan</option>
-                <option value={1}>Hatchback</option>
-                <option value={2}>Wagon</option>
-                <option value={3}>Hardtop</option>
-                <option value={4}>Convertible</option>
-              </select>
+                value={form.body_style}
+                onChange={(val) => update("body_style", val)}
+                options={BODY_STYLE_OPTIONS}
+                placeholder="Select Body Style..."
+                error={!!fieldErrors.body_style}
+              />
+              {fieldErrors.body_style && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.body_style}</span>}
             </div>
 
             <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
               <label>Drive Wheel Type</label>
-              <select
-                value={form.drive_wheels}
-                onChange={(e) => update("drive_wheels", +e.target.value)}
+              <CustomSelect
                 id="input-drive-wheels"
-              >
-                <option value={0}>Front-Wheel Drive</option>
-                <option value={1}>Rear-Wheel Drive</option>
-                <option value={2}>All-Wheel Drive</option>
-              </select>
+                value={form.drive_wheels}
+                onChange={(val) => update("drive_wheels", val)}
+                options={DRIVE_WHEEL_OPTIONS}
+                placeholder="Select Wheels..."
+                error={!!fieldErrors.drive_wheels}
+              />
+              {fieldErrors.drive_wheels && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.drive_wheels}</span>}
             </div>
           </div>
 
@@ -175,31 +225,28 @@ export default function Predict() {
           <div style={{ display: "flex", gap: "1rem" }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label>Number of Cylinders</label>
-              <select
-                value={form.num_of_cylinders}
-                onChange={(e) => update("num_of_cylinders", +e.target.value)}
+              <CustomSelect
                 id="input-cylinders"
-              >
-                <option value={2}>2 Cylinders</option>
-                <option value={3}>3 Cylinders</option>
-                <option value={4}>4 Cylinders</option>
-                <option value={5}>5 Cylinders</option>
-                <option value={6}>6 Cylinders</option>
-                <option value={8}>8 Cylinders</option>
-                <option value={12}>12 Cylinders</option>
-              </select>
+                value={form.num_of_cylinders}
+                onChange={(val) => update("num_of_cylinders", val)}
+                options={CYLINDER_OPTIONS}
+                placeholder="Select Cylinders..."
+                error={!!fieldErrors.num_of_cylinders}
+              />
+              {fieldErrors.num_of_cylinders && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.num_of_cylinders}</span>}
             </div>
 
             <div className="form-group" style={{ flex: 1 }}>
               <label>Fuel Type</label>
-              <select
-                value={form.fuel_type}
-                onChange={(e) => update("fuel_type", +e.target.value)}
+              <CustomSelect
                 id="input-fuel-type"
-              >
-                <option value={0}>Gas</option>
-                <option value={1}>Diesel</option>
-              </select>
+                value={form.fuel_type}
+                onChange={(val) => update("fuel_type", val)}
+                options={FUEL_TYPE_OPTIONS}
+                placeholder="Select Fuel Type..."
+                error={!!fieldErrors.fuel_type}
+              />
+              {fieldErrors.fuel_type && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.fuel_type}</span>}
             </div>
           </div>
 
@@ -211,9 +258,11 @@ export default function Predict() {
               min={1500}
               max={4500}
               value={form.curb_weight}
-              onChange={(e) => update("curb_weight", +e.target.value)}
+              onChange={(e) => update("curb_weight", e.target.value === "" ? "" : +e.target.value)}
               id="input-curb-weight"
+              style={fieldErrors.curb_weight ? { borderColor: 'var(--danger)' } : {}}
             />
+            {fieldErrors.curb_weight && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.curb_weight}</span>}
           </div>
 
           {/* Engine Size slider */}
@@ -272,11 +321,12 @@ export default function Predict() {
                 type="number"
                 min={10}
                 max={60}
-                required
                 value={form.city_mpg}
                 onChange={(e) => update("city_mpg", e.target.value === "" ? "" : +e.target.value)}
                 id="input-city-mpg"
+                style={fieldErrors.city_mpg ? { borderColor: 'var(--danger)' } : {}}
               />
+              {fieldErrors.city_mpg && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.city_mpg}</span>}
             </div>
             <div className="form-group" style={{ flex: 1 }}>
               <label>Highway MPG</label>
@@ -284,11 +334,12 @@ export default function Predict() {
                 type="number"
                 min={10}
                 max={60}
-                required
                 value={form.highway_mpg}
                 onChange={(e) => update("highway_mpg", e.target.value === "" ? "" : +e.target.value)}
                 id="input-highway-mpg"
+                style={fieldErrors.highway_mpg ? { borderColor: 'var(--danger)' } : {}}
               />
+              {fieldErrors.highway_mpg && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem', display: 'block' }}>{fieldErrors.highway_mpg}</span>}
             </div>
           </div>
 
@@ -299,8 +350,8 @@ export default function Predict() {
           {/* Buttons */}
           <div className="form-actions">
             <button
+              type="submit"
               className="btn-predict"
-              onClick={handlePredict}
               disabled={loading}
               id="btn-predict"
             >
@@ -317,6 +368,7 @@ export default function Predict() {
               )}
             </button>
             <button
+              type="button"
               className="btn-reset"
               onClick={handleReset}
               id="btn-reset"
@@ -324,7 +376,7 @@ export default function Predict() {
               Reset
             </button>
           </div>
-        </div>
+        </form>
 
         {/* ── Result Card ── */}
         {result ? (

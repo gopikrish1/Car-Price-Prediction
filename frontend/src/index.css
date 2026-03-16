@@ -787,6 +787,79 @@ body {
   box-shadow: 0 0 0 3px var(--primary-100);
 }
 
+/* ─────────────────────────────────────────────
+   CUSTOM SELECT (replaces native <select>)
+   ───────────────────────────────────────────── */
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+.custom-select-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.custom-select-control:hover {
+  border-color: var(--primary-300);
+}
+.custom-select-control.open {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+.custom-select-arrow {
+  color: var(--gray-400);
+  display: flex;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.custom-select-arrow.open {
+  transform: rotate(180deg);
+  color: var(--primary-600);
+}
+.custom-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  box-shadow: var(--shadow-xl);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 150;
+  padding: 0.4rem;
+  animation: slideDown 0.2s ease;
+}
+.custom-select-option {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.custom-select-option:hover {
+  background: var(--primary-50);
+  color: var(--primary-700);
+}
+.custom-select-option.selected {
+  background: var(--primary-100);
+  color: var(--primary-800);
+  font-weight: 700;
+}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;
