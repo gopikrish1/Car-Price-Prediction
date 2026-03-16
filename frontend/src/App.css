@@ -1,7 +1,4 @@
-.main-content {
-  margin-left: var(--sidebar-width);
+/* App-level overrides (kept minimal; design in index.css) */
+main {
   flex: 1;
-  padding: 32px 36px;
-  min-height: 100vh;
-  background: var(--gray-50);
 }

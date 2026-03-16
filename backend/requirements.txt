@@ -3,4 +3,5 @@ uvicorn[standard]
 pandas
 scikit-learn
 numpy
-python-dotenv
+joblib
+python-multipart
