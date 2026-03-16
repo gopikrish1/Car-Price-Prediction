@@ -389,7 +389,9 @@ export default function Predict() {
               })}
             </div>
             <div className="result-card__model">
-              {result.model_used.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+              {result.model_used === "ensemble" 
+                ? "Ultimate Ensemble" 
+                : result.model_used.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
             </div>
             <div className="result-card__note">
               Based on 205 records from the UCI Automobile dataset
